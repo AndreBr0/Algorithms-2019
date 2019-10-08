@@ -15,12 +15,14 @@ class TaskTestsJava : AbstractTaskTests() {
     @Tag("Normal")
     fun testSortAddresses() {
         sortAddresses { inputName, outputName -> JavaTasks.sortAddresses(inputName, outputName) }
+
     }
 
     @Test
     @Tag("Normal")
     fun testSortTemperatures() {
         sortTemperatures { inputName, outputName -> JavaTasks.sortTemperatures(inputName, outputName) }
+
     }
 
     @Test

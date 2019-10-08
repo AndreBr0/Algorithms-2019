@@ -2,6 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -65,8 +68,60 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) {
-        throw new NotImplementedError();
+        Map<String, ArrayList<String>> map = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(inputName)))) {
+            String str = br.readLine();
+            while (str != null) {
+                StringBuilder sb = new StringBuilder();
+                String[] array = str.split(" - ");
+                map.putIfAbsent(array[1], new ArrayList<>());
+                map.get(array[1]).add(array[0]);
+                str = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Map<String, ArrayList<Integer>> homeNumbers = new HashMap<>();
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outputName)))) {
+            for (String str : map.keySet()) {
+                String[] temp = str.split(" ");
+                Integer homeNumber = Integer.parseInt(temp[1]);
+                homeNumbers.putIfAbsent(temp[0], new ArrayList<>());
+                homeNumbers.get(temp[0]).add(homeNumber);
+            }
+            String[] sortedStreets = homeNumbers.keySet().toArray(new String[0]);
+            Arrays.sort(sortedStreets);
+            for (String str : sortedStreets) {
+                Integer[] sortedHomeNumbers = homeNumbers.get(str).toArray(new Integer[0]);
+                Arrays.sort(sortedHomeNumbers);
+                for (Integer number : sortedHomeNumbers) {
+                    StringBuilder streetWithNumber = new StringBuilder();
+                    streetWithNumber.append(str);
+                    streetWithNumber.append(" ");
+                    streetWithNumber.append(number.toString());
+                    ArrayList<String> list = map.get(streetWithNumber.toString());
+                    Collections.sort(list);
+                    bw.write(streetWithNumber.toString());
+                    bw.write(" - ");
+                    bw.write(list.get(0));
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 1; i < list.size(); i++) {
+                        sb.append(", ");
+                        sb.append(list.get(i));
+                    }
+                    bw.write(sb.toString());
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+/*
+В map храним все улицы с номерами и имена людей, в homeNumbers ещё улицы и номера в формате Integer,
+ресурсоёмкость O(n)
+Трудоёмкость, как у сортировки массива O(nlgn)
+ */
 
     /**
      * Сортировка температур
@@ -99,9 +154,58 @@ public class JavaTasks {
      * 121.3
      */
     static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+        List<Integer> temperatures = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(inputName)))) {
+            String str = br.readLine();
+            while (str != null) {
+                boolean negative = false;
+                if (str.charAt(0) == '-') {
+                    negative = true;
+                    str = str.substring(1);
+                }
+                String[] array = str.split("\\.");
+                Integer integer = Integer.parseInt(array[0]) * 10 + Integer.parseInt(array[1]);
+                if (negative) integer = - integer;
+                temperatures.add(integer);
+                str = br.readLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer[] sortedArray = countingSort(temperatures.toArray(new Integer[0]), -2730, 5000);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputName))) {
+            for (Integer integer : sortedArray) {
+                if (integer < 0) bw.write("-");
+                bw.write(Math.abs(integer) / 10 + "." + Math.abs(integer) % 10 + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    public static Integer[] countingSort(Integer[] elements, int lowLimit, int highLimit) {
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int i = lowLimit; i <= highLimit; i++) {
+            count.put(i, 0);
+        }
+        for (Integer element : elements) {
+            count.put(element, count.get(element) + 1);
+        }
+        for (int j = lowLimit + 1; j <= highLimit; j++) {
+            count.put(j, count.get(j - 1) + count.get(j));
+        }
+        Integer[] out = new Integer[elements.length];
+        for (int j = elements.length - 1; j >= 0; j--) {
+            out[count.get(elements[j]) - 1] = elements[j];
+            count.put(elements[j], count.get(elements[j]) - 1);
+        }
+        return out;
+    }
+
+    /*
+    Ресурсоёмкость O(n), из-за хранения массива
+    Трудоёмкость O(n), из-за сортировки подсчётом
+     */
     /**
      * Сортировка последовательности
      *

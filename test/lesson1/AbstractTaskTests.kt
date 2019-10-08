@@ -49,27 +49,14 @@ abstract class AbstractTaskTests : AbstractFileTests() {
 
     protected fun sortAddresses(sortAddresses: (String, String) -> Unit) {
         try {
-            sortAddresses("input/addr_in1.txt", "temp.txt")
-            assertFileContent(
-                "temp.txt",
-                """
-                    Железнодорожная 3 - Петров Иван
-                    Железнодорожная 7 - Иванов Алексей, Иванов Михаил
-                    Садовая 5 - Сидоров Петр, Сидорова Мария
-                """.trimIndent()
-            )
+            sortAddresses("input/addresses.txt", "temp.txt")
+            assertFileContent("temp.txt", File("input/addresses_out.txt").readLines())
         } finally {
             File("temp.txt").delete()
         }
         try {
-            sortAddresses("input/addr_in2.txt", "temp.txt")
-            assertFileContent("temp.txt", File("input/addr_out2.txt").readLines())
-        } finally {
-            File("temp.txt").delete()
-        }
-        try {
-            sortAddresses("input/addr_in3.txt", "temp.txt")
-            assertFileContent("temp.txt", File("input/addr_out3.txt").readLines())
+            sortAddresses("input/addresses2.txt", "temp.txt")
+            assertFileContent("temp.txt", File("input/addresses_out2.txt").readLines())
         } finally {
             File("temp.txt").delete()
         }
@@ -102,17 +89,15 @@ abstract class AbstractTaskTests : AbstractFileTests() {
 
     protected fun sortTemperatures(sortTemperatures: (String, String) -> Unit) {
         try {
-            sortTemperatures("input/temp_in1.txt", "temp.txt")
+            sortTemperatures("input/temp.txt", "temp.txt")
             assertFileContent(
                 "temp.txt",
                 """
-                    -98.4
-                    -12.6
-                    -12.6
-                    11.0
-                    24.7
-                    99.5
-                    121.3
+                    -273.0
+                    -40.0
+                    40.0
+                    40.0
+                    500.0
                 """.trimIndent()
             )
         } finally {
