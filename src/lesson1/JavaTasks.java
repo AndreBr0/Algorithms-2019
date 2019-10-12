@@ -1,6 +1,7 @@
 package lesson1;
 
 import kotlin.NotImplementedError;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -67,61 +68,117 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortAddresses(String inputName, String outputName) {
-        Map<String, ArrayList<String>> map = new HashMap<>();
+
+    private static class Address implements Comparable<Address> {
+
+        private String streetName;
+        private Integer streetNumber;
+
+        public String getStreetName() {
+            return streetName;
+        }
+
+        public void setStreetName(String streetName) {
+            this.streetName = streetName;
+        }
+
+        public Integer getStreetNumber() {
+            return streetNumber;
+        }
+
+        public void setStreetNumber(Integer streetNumber) {
+            this.streetNumber = streetNumber;
+        }
+
+        private static final Comparator<Address> COMPARATOR = Comparator
+                .comparing(Address::getStreetName)
+                .thenComparingInt(Address::getStreetNumber);
+
+        @Override
+        public int compareTo(@NotNull Address o) {
+            return COMPARATOR.compare(this, o);
+        }
+
+        @Override
+        public String toString() {
+            return streetName + " " + streetNumber;
+        }
+    }
+
+
+    private static class Person implements Comparable<Person> {
+
+        private String personName;
+        private String personSurname;
+
+        public String getPersonName() {
+            return personName;
+        }
+
+        public void setPersonName(String personName) {
+            this.personName = personName;
+        }
+
+        public String getPersonSurname() {
+            return personSurname;
+        }
+
+        public void setPersonSurname(String personSurname) {
+            this.personSurname = personSurname;
+        }
+
+        private static final Comparator<Person> COMPARATOR = Comparator
+                .comparing(Person::getPersonSurname).thenComparing(Person::getPersonName);
+
+        @Override
+        public int compareTo(@NotNull Person o) {
+            return COMPARATOR.compare(this, o);
+        }
+
+        @Override
+        public String toString() {
+            return personSurname + " " + personName;
+        }
+    }
+
+    static public void sortAddresses(String inputName, String outputName) throws IOException {
+        TreeMap<Address, TreeSet<Person>> map = new TreeMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(new File(inputName)))) {
             String str = br.readLine();
             while (str != null) {
-                StringBuilder sb = new StringBuilder();
-                String[] array = str.split(" - ");
-                map.putIfAbsent(array[1], new ArrayList<>());
-                map.get(array[1]).add(array[0]);
+                Address address = new Address();
+                String[] array = str.split(" ");
+                address.setStreetName(array[3]);
+                address.setStreetNumber(Integer.parseInt(array[4]));
+                Person person = new Person();
+                person.setPersonSurname(array[0]);
+                person.setPersonName(array[1]);
+                map.putIfAbsent(address, new TreeSet<>());
+                map.get(address).add(person);
                 str = br.readLine();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        Map<String, ArrayList<Integer>> homeNumbers = new HashMap<>();
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outputName)))) {
-            for (String str : map.keySet()) {
-                String[] temp = str.split(" ");
-                Integer homeNumber = Integer.parseInt(temp[1]);
-                homeNumbers.putIfAbsent(temp[0], new ArrayList<>());
-                homeNumbers.get(temp[0]).add(homeNumber);
-            }
-            String[] sortedStreets = homeNumbers.keySet().toArray(new String[0]);
-            Arrays.sort(sortedStreets);
-            for (String str : sortedStreets) {
-                Integer[] sortedHomeNumbers = homeNumbers.get(str).toArray(new Integer[0]);
-                Arrays.sort(sortedHomeNumbers);
-                for (Integer number : sortedHomeNumbers) {
-                    StringBuilder streetWithNumber = new StringBuilder();
-                    streetWithNumber.append(str);
-                    streetWithNumber.append(" ");
-                    streetWithNumber.append(number.toString());
-                    ArrayList<String> list = map.get(streetWithNumber.toString());
-                    Collections.sort(list);
-                    bw.write(streetWithNumber.toString());
-                    bw.write(" - ");
-                    bw.write(list.get(0));
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 1; i < list.size(); i++) {
-                        sb.append(", ");
-                        sb.append(list.get(i));
+            for (Map.Entry<Address, TreeSet<Person>> entry : map.entrySet()) {
+                bw.write(entry.getKey().toString());
+                bw.write(" - ");
+                boolean firstWasFlag = false;
+                for (Person person : entry.getValue()) {
+                    if (firstWasFlag) {
+                        bw.write(", ");
                     }
-                    bw.write(sb.toString());
-                    bw.newLine();
+                    bw.write(person.toString());
+                    firstWasFlag = true;
                 }
+                bw.newLine();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
-/*
-В map храним все улицы с номерами и имена людей, в homeNumbers ещё улицы и номера в формате Integer,
-ресурсоёмкость O(n)
-Трудоёмкость, как у сортировки массива O(nlgn)
- */
+    /*
+    В map храним улицы и имена людей, ресурсоёмкость O(n)
+    Добавляем улицы и людей в treeset, трудоёмкость O(nlgn)
+     */
 
     /**
      * Сортировка температур
@@ -153,8 +210,10 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) {
-        List<Integer> temperatures = new ArrayList<>();
+    public static void sortTemperatures(String inputName, String outputName) throws IOException {
+        int positiveInterval = 5001;
+        int negativeInterval = 2730;
+        int[] counter = new int[negativeInterval + positiveInterval];
         try (BufferedReader br = new BufferedReader(new FileReader(new File(inputName)))) {
             String str = br.readLine();
             while (str != null) {
@@ -165,47 +224,42 @@ public class JavaTasks {
                 }
                 String[] array = str.split("\\.");
                 Integer integer = Integer.parseInt(array[0]) * 10 + Integer.parseInt(array[1]);
-                if (negative) integer = - integer;
-                temperatures.add(integer);
+                if (negative) {
+                    counter[integer + positiveInterval - 1] += 1;
+                } else {
+                    counter[integer] += 1;
+                }
                 str = br.readLine();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        Integer[] sortedArray = countingSort(temperatures.toArray(new Integer[0]), -2730, 5000);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputName))) {
-            for (Integer integer : sortedArray) {
-                if (integer < 0) bw.write("-");
-                bw.write(Math.abs(integer) / 10 + "." + Math.abs(integer) % 10 + "\n");
+            for (int i = counter.length - 1; i >= positiveInterval; i--) {
+                int integer = i - positiveInterval + 1;
+                StringBuilder sb = new StringBuilder();
+                String string = sb.append("-").append(integer / 10).append(".").append(integer % 10).toString();
+                for (int j = 0; j < counter[i]; j++) {
+                    bw.write(string);
+                    bw.newLine();
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            for (int i = 0; i < positiveInterval; i++) {
+                StringBuilder sb = new StringBuilder();
+                String string = sb.append(i / 10).append(".").append(i % 10).toString();
+                for (int j = 0; j < counter[i]; j++) {
+                    bw.write(string);
+                    bw.newLine();
+                }
+            }
         }
     }
-
-    public static Integer[] countingSort(Integer[] elements, int lowLimit, int highLimit) {
-        Map<Integer, Integer> count = new HashMap<>();
-        for (int i = lowLimit; i <= highLimit; i++) {
-            count.put(i, 0);
-        }
-        for (Integer element : elements) {
-            count.put(element, count.get(element) + 1);
-        }
-        for (int j = lowLimit + 1; j <= highLimit; j++) {
-            count.put(j, count.get(j - 1) + count.get(j));
-        }
-        Integer[] out = new Integer[elements.length];
-        for (int j = elements.length - 1; j >= 0; j--) {
-            out[count.get(elements[j]) - 1] = elements[j];
-            count.put(elements[j], count.get(elements[j]) - 1);
-        }
-        return out;
-    }
-
     /*
-    Ресурсоёмкость O(n), из-за хранения массива
+    Ресурсоёмкость O(1)
     Трудоёмкость O(n), из-за сортировки подсчётом
      */
+
+
+
+
     /**
      * Сортировка последовательности
      *
