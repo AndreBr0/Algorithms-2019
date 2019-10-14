@@ -66,6 +66,12 @@ abstract class AbstractAlgorithmsTests {
         assertEquals(50000000, josephTask(50000000, 1))
         assertEquals(3, josephTask(8, 5))
         assertEquals(28, josephTask(40, 3))
+        assertEquals(5, josephTask(6, 7))
+        assertEquals(1000, josephTask(1000, 1))
+        assertEquals(31, josephTask(41, 3))
+        assertEquals(19, josephTask(41, 2))
+        assertEquals(9, josephTask(12, 2))
+        assertEquals(11, josephTask(13, 2))
         var menNumber = 2
         for (i in 1..20) {
             assertEquals(1, josephTask(menNumber, 2))
@@ -77,6 +83,11 @@ abstract class AbstractAlgorithmsTests {
         assertEquals("", longestCommonSubstring("мой мир", "я"))
         assertEquals("зд", longestCommonSubstring("здравствуй мир", "мы здесь"))
         assertEquals("СЕРВАТОР", longestCommonSubstring("ОБСЕРВАТОРИЯ", "КОНСЕРВАТОРЫ"))
+        assertEquals("е", longestCommonSubstring("съешьещёэтихфранцузскихбулок", "выпейжечаю"))
+        assertEquals("к", longestCommonSubstring("кургпшургпцшоку", "ущшкгнщукшегукщзшег"))
+        assertEquals("ес", longestCommonSubstring("оченьдлинныйнеизвестныйтекст", "надонаписатьещёбольшеслов"))
+        assertEquals("р", longestCommonSubstring("ПрОсТо", "просто"))
+        assertEquals("", longestCommonSubstring("Это была очень длинная история о", ""))
         assertEquals(
             "огда ", longestCommonSubstring(
                 """

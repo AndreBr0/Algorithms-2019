@@ -85,8 +85,19 @@ public class JavaAlgorithms {
      * но приветствуется попытка решить её самостоятельно.
      */
     static public int josephTask(int menNumber, int choiceInterval) {
-        throw new NotImplementedError();
+        if (menNumber == 1) return 1;
+        int n = 2;
+        int k = 1;
+        while (n != menNumber + 1) {
+            k = 1 + (k + choiceInterval - 1) % n;
+            n++;
+        }
+        return k;
     }
+    /*
+    ресурсоёмкость: две переменные, O(1)
+    трудоёмкость: цикл от 2 до n + 1, O(n)
+     */
 
     /**
      * Наибольшая общая подстрока.
@@ -99,9 +110,43 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
+    static public String longestCommonSubstring(String first, String second) {
+        int[] a1 = new int[second.length()];
+        int[] a2 = new int[second.length()];
+        int maxLength = 0;
+        int cost;
+        int begin = 0;
+        int end = -1;
+
+        for (int i = 0; i < first.length(); i++) {
+            for (int j = 0; j < second.length(); j++) {
+                if (first.charAt(i) != second.charAt(j)) {
+                    cost = 0;
+                } else {
+                    if ((i == 0) || (j == 0)) {
+                        cost = 1;
+                    } else {
+                        cost = a1[j - 1] + 1;
+                    }
+                }
+                a2[j] = cost;
+                if (a2[j] > maxLength) {
+                    maxLength = a2[j];
+                    begin = j - maxLength + 1;
+                    end = j;
+                }
+            }
+            int[] t = a1;
+            a1 = a2;
+            a2 = t;
+        }
+
+        return second.substring(begin, end + 1);
     }
+    /*
+    ресурсоёмкость: два массива длины n, O(n)
+    трудоёмкость: O(длина первой * длина второй)
+     */
 
     /**
      * Число простых чисел в интервале
