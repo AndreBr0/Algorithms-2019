@@ -104,21 +104,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     Сложность: O(lgn)
     */
 
-    // Функция трансплант, которая заменяет поддерево,являющееся дочернем по отношению к поддереву, другим родителем.
-
-    private void transplant(Node<T> to, Node<T> from) {
-        if (to.parent == null) {
-            root = from;
-        } else if (to.equals(to.parent.left)) {
-            to.parent.left = from;
-        } else {
-            to.parent.right = from;
-        }
-        if (from != null) {
-            from.parent = to.parent;
-        }
-    }
-
 // Функция удаления Nod'а которая удаляет в дереве переданный объект
 
     private boolean delete(Node<T> node) {
@@ -140,6 +125,21 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
         size--;
         return true;
+    }
+
+    // Функция трансплант, которая заменяет поддерево,являющееся дочернем по отношению к поддереву, другим родителем.
+
+    private void transplant(Node<T> to, Node<T> from) {
+        if (to.parent == null) {
+            root = from;
+        } else if (to.equals(to.parent.left)) {
+            to.parent.left = from;
+        } else {
+            to.parent.right = from;
+        }
+        if (from != null) {
+            from.parent = to.parent;
+        }
     }
 
     @Override
