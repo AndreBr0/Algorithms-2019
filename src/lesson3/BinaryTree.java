@@ -13,9 +13,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     private static class Node<T> {
         final T value;
-
         Node<T> left = null;
-
         Node<T> right = null;
 
         // переменная родителя
